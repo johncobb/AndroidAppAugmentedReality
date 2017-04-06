@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.cphandheld.johnc.appaugmentedreality.MainActivity">
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/activity_main"
+        android:layout_width="96dp"
+        android:layout_height="495dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="8dp">
+
+        <com.cphandheld.johnc.appaugmentedreality.ARCameraSurfaceView
+            android:id="@+id/cameraSurfaceView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <com.cphandheld.johnc.appaugmentedreality.ARDrawSurfaceView
+            android:id="@+id/drawSurfaceView"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+    </FrameLayout>
+
+
+
+
+</android.support.constraint.ConstraintLayout>

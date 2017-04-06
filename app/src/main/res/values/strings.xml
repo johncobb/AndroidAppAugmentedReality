@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">AppAugmentedReality</string>
+    <string name="greeting">Hello (Augmented) World!</string>
+</resources>
