@@ -18,6 +18,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import java.security.Timestamp;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -30,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
     private LocationProvider mHigh;
 
     private ARDrawSurfaceView mARDrawSurfaceView;
+
+    private float mAzimuth = 0.0f;
+    private float mPitch = 0.0f;
+    private float mRoll = 0.0f;
 
 
     @Override
@@ -50,8 +57,6 @@ public class MainActivity extends AppCompatActivity {
         mHigh = mLocationManager.getProvider(mLocationManager.getBestProvider(ARUtil.getFineCriteria(), true));
 
         initSensors();
-
-
 
     }
 
@@ -87,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
     }
 
+
+
     private void initSensors() {
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProviderEnabled(String provider) {
 
+
             }
 
             @Override
@@ -124,14 +132,57 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    private static final float ALPHA = 0.25f;
+    protected float[] sensors;
+
+    /*
+     *
+     *  Implement sensor rate independent low-pass filter
+     *  filter = old + (new-old)/(smoothing/timeSinceLastUpdate)
+     *
+     */
+    protected float[] lpf( float[] input, float[] output ) {
+        if ( output == null ) return input;
+
+        for ( int i=0; i<input.length; i++ ) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
+    }
+
+    long lastInvalidate = 0;
+
     private final SensorEventListener mListener = new SensorEventListener() {
         public void onSensorChanged(SensorEvent event) {
+
+//            mAzimuth = event.values[0];
+//            mPitch = event.values[1];
+//            mRoll = event.values[2];
+
+            // Apply low pass filter to sensors
+            sensors = lpf(event.values.clone(), sensors);
+
+            // Update the variables with filtered values
+            mAzimuth = sensors[0];
+            mPitch = sensors[1];
+            mRoll = sensors[2];
+
             if(DEBUG)
-                Log.d(TAG, "sensorChanged (" + event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ")");
+                Log.d(TAG, "sensorChanged Azimuth, Pitch, Roll (" + mAzimuth + ", " + mPitch + ", " + mRoll + ")");
+
 
             if (mARDrawSurfaceView != null) {
-                mARDrawSurfaceView.setOffset(event.values[0]);
-                mARDrawSurfaceView.invalidate();
+                mARDrawSurfaceView.setOffset(mAzimuth);
+                mARDrawSurfaceView.setMyOrientation(mAzimuth, mPitch, mRoll);
+
+                // Only update every 50 millis so that we don't overload
+                // the draw routine
+                if((System.currentTimeMillis() - lastInvalidate) > 50) {
+                    mARDrawSurfaceView.invalidate();
+                    lastInvalidate = System.currentTimeMillis();
+                }
+
             }
         }
 

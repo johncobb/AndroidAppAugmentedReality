@@ -3,9 +3,6 @@ package com.cphandheld.johnc.appaugmentedreality;
 /**
  * Created by jcobb on 4/6/17.
  */
-
-
-
     import java.io.IOException;
     import java.util.List;
 

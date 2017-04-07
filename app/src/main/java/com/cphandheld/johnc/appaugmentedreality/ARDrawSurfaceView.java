@@ -34,8 +34,17 @@ import android.view.View;
  * @author Coby Plain coby.plain@gmail.com, Ali Muzaffar ali@muzaffar.me
  */
 
+/*
+ * Credit Source: https://www.netguru.co/blog/augmented-reality-mobile-android
+ */
+
 public class ARDrawSurfaceView extends View {
-    ARPoint me = new ARPoint(-33.870932d, 151.204727d, "Me");
+    ARPoint _ARPointMe = new ARPoint(37.97280602299139d, -87.40445584058762d, "Me");
+
+    float _Azimuth = 0.0f;
+    float _Pitch = 0.0f;
+    float _Roll = 0.0f;
+
     Paint mPaint = new Paint();
     private double OFFSET = 0d;
     private double screenWidth, screenHeight = 0d;
@@ -44,10 +53,11 @@ public class ARDrawSurfaceView extends View {
 
     public static ArrayList<ARPoint> props = new ArrayList<ARPoint>();
     static {
-        props.add(new ARPoint(90d, 110.8000, "North Pole"));
-        props.add(new ARPoint(-90d, -110.8000, "South Pole"));
-        props.add(new ARPoint(-33.870932d, 151.8000, "East"));
-        props.add(new ARPoint(-33.870932d, 150.8000, "West"));
+//        props.add(new ARPoint(90d, 110.8000, "North Pole"));
+//        props.add(new ARPoint(-90d, -110.8000, "South Pole"));
+//        props.add(new ARPoint(-33.870932d, 151.8000, "East"));
+//        props.add(new ARPoint(-33.870932d, 150.8000, "West"));
+        props.add(new ARPoint(37.97280602299139d, -87.40445584058762d, "CPHandheld"));
     }
 
     public ARDrawSurfaceView(Context c, Paint paint) {
@@ -93,7 +103,7 @@ public class ARDrawSurfaceView extends View {
             Bitmap blip = mBlips[i];
             Bitmap spot = mSpots[i];
             ARPoint u = props.get(i);
-            double dist = distInMetres(me, u);
+            double dist = distInMetres(_ARPointMe, u);
 
             if (blip == null || spot == null)
                 continue;
@@ -101,7 +111,7 @@ public class ARDrawSurfaceView extends View {
             if(dist > 70)
                 dist = 70; //we have set points very far away for demonstration
 
-            double angle = bearing(me.latitude, me.longitude, u.latitude, u.longitude) - OFFSET;
+            double angle = bearing(_ARPointMe.latitude, _ARPointMe.longitude, u.latitude, u.longitude) - OFFSET;
             double xPos, yPos;
 
             if(angle < 0)
@@ -139,6 +149,14 @@ public class ARDrawSurfaceView extends View {
             u.y = (float)screenHeight/2 + spotCentreY;
             canvas.drawBitmap(spot, u.x, u.y, mPaint); //camera spot
             canvas.drawText(u.description, u.x, u.y, mPaint); //text
+
+            String lat = String.format("%.6f", _ARPointMe.latitude);
+            String lon = String.format("%.6f", _ARPointMe.longitude);
+
+            canvas.drawText("Lat:" + lat + " Lon:" + lon, 0.0f, (float)(screenHeight - 100.0f), mPaint);
+
+//            canvas.drawText("Azimuth:" + _Azimuth + " Pitch:" + _Pitch + " Roll" + _Roll, 0.0f, (float)(screenHeight - 50.0f), mPaint);
+            canvas.drawText("Azimuth:" + _Azimuth , 0.0f, (float)(screenHeight - 50.0f), mPaint);
         }
     }
 
@@ -147,10 +165,23 @@ public class ARDrawSurfaceView extends View {
     }
 
     public void setMyLocation(double latitude, double longitude) {
-        me.latitude = latitude;
-        me.longitude = longitude;
+        _ARPointMe.latitude = latitude;
+        _ARPointMe.longitude = longitude;
     }
 
+    public void setMyOrientation(float azimuth, float pitch, float roll) {
+        _Azimuth = azimuth;
+        _Pitch = pitch;
+        _Roll = roll;
+    }
+
+
+
+    /*
+     * Tangent: Opposite/Adgacent
+     * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
+     *
+     */
     protected double distInMetres(ARPoint me, ARPoint u) {
 
         double lat1 = me.latitude;
@@ -170,6 +201,50 @@ public class ARDrawSurfaceView extends View {
 
         return dist * 1000;
     }
+
+    /*
+     * Tangent: Opposite/Adgacent
+     * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
+     * Source: https://www.netguru.co/blog/augmented-reality-mobile-android
+     *
+     *  Quadrant        Sign of Growth    Relation between azimuth
+     *   coords     Δ cos(A)  Δ sin(A)  azimuth and angle ᵠ in grads
+     *  --------    --------  --------  ----------------------------
+     *     I           +          +                 A=ᵠ
+     *    II           -          +               A=200g-ᵠ
+     *   III           -          -               A=200g+ᵠ
+     *    IV           +          -               A=400g-ᵠ
+     *
+     */
+    protected double calculateTheoreticalAzimuth(ARPoint poi) {
+
+        double dX = poi.latitude - _ARPointMe.latitude;
+        double dY = poi.longitude - _ARPointMe.longitude;
+
+        double phiAngle;
+        double tanOfPhiAngle;
+        double azimuth;
+
+        tanOfPhiAngle = Math.abs(dY / dX);
+        phiAngle = Math.atan(tanOfPhiAngle);
+        tanOfPhiAngle = Math.toDegrees(tanOfPhiAngle);
+
+        if (dX > 0 && dY > 0) {
+            return azimuth = phiAngle;
+        } else if (dX < 0 && dY > 0) {
+            return azimuth = 180 - phiAngle;
+        } else if (dX < 0 && dY < 0){
+            return azimuth = 180 + phiAngle;
+        } else if (dX > 0 && dY < 0) {
+            return 360 - phiAngle;
+        }
+
+        return phiAngle;
+
+    }
+
+
+
 
     protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
         double longDiff = Math.toRadians(lon2 - lon1);
