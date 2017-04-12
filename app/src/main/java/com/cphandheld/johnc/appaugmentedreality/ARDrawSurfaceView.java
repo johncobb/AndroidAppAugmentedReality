@@ -47,7 +47,7 @@ public class ARDrawSurfaceView extends View {
 
     Paint mPaint = new Paint();
     private double OFFSET = 0d;
-    private double screenWidth, screenHeight = 0d;
+    private double mScreenWidth, mScreenHeight = 0d;
     private Bitmap[] mSpots, mBlips;
     private Bitmap mRadar;
 
@@ -57,7 +57,7 @@ public class ARDrawSurfaceView extends View {
 //        props.add(new ARPoint(-90d, -110.8000, "South Pole"));
 //        props.add(new ARPoint(-33.870932d, 151.8000, "East"));
 //        props.add(new ARPoint(-33.870932d, 150.8000, "West"));
-        props.add(new ARPoint(37.97280602299139d, -87.40445584058762d, "CPHandheld"));
+        props.add(new ARPoint(37.97280602299139d, -87.40445584058762d, "CP Handheld"));
     }
 
     public ARDrawSurfaceView(Context c, Paint paint) {
@@ -87,8 +87,8 @@ public class ARDrawSurfaceView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         Log.d("onSizeChanged", "in here w=" + w + " h=" + h);
-        screenWidth = (double) w;
-        screenHeight = (double) h;
+        mScreenWidth = (double) w;
+        mScreenHeight = (double) h;
     }
 
     @Override
@@ -96,8 +96,8 @@ public class ARDrawSurfaceView extends View {
 
         canvas.drawBitmap(mRadar, 0, 0, mPaint);
 
-        int radarCentreX = mRadar.getWidth() / 2;
-        int radarCentreY = mRadar.getHeight() / 2;
+        int radarCenterX = mRadar.getWidth() / 2;
+        int radarCenterY = mRadar.getHeight() / 2;
 
         for (int i = 0; i < mBlips.length; i++) {
             Bitmap blip = mBlips[i];
@@ -123,14 +123,14 @@ public class ARDrawSurfaceView extends View {
             if (angle > 90 && angle < 270)
                 yPos *= -1;
 
-            double posInPx = angle * (screenWidth / 90d);
+            double posInPx = angle * (mScreenWidth / 90d);
 
             int blipCentreX = blip.getWidth() / 2;
             int blipCentreY = blip.getHeight() / 2;
 
             xPos = xPos - blipCentreX;
             yPos = yPos + blipCentreY;
-            canvas.drawBitmap(blip, (radarCentreX + (int) xPos), (radarCentreY - (int) yPos), mPaint); //radar blip
+            canvas.drawBitmap(blip, (radarCenterX + (int) xPos), (radarCenterY - (int) yPos), mPaint); //radar blip
 
             //reuse xPos
             int spotCentreX = spot.getWidth() / 2;
@@ -138,25 +138,27 @@ public class ARDrawSurfaceView extends View {
             xPos = posInPx - spotCentreX;
 
             if (angle <= 45)
-                u.x = (float) ((screenWidth / 2) + xPos);
+                u.x = (float) ((mScreenWidth / 2) + xPos);
 
             else if (angle >= 315)
-                u.x = (float) ((screenWidth / 2) - ((screenWidth*4) - xPos));
+                u.x = (float) ((mScreenWidth / 2) - ((mScreenWidth*4) - xPos));
 
             else
-                u.x = (float) (float)(screenWidth*9); //somewhere off the screen
+                u.x = (float) (float)(mScreenWidth*9); //somewhere off the screen
 
-            u.y = (float)screenHeight/2 + spotCentreY;
+            u.y = (float)mScreenHeight/2 + spotCentreY;
             canvas.drawBitmap(spot, u.x, u.y, mPaint); //camera spot
             canvas.drawText(u.description, u.x, u.y, mPaint); //text
 
             String lat = String.format("%.6f", _ARPointMe.latitude);
             String lon = String.format("%.6f", _ARPointMe.longitude);
+            String pitch = String.format("%.2f", _Pitch);
+            String roll = String.format("%.2f", _Roll);
+            String azimuth = String.format("%.2f", _Azimuth);
 
-            canvas.drawText("Lat:" + lat + " Lon:" + lon, 0.0f, (float)(screenHeight - 100.0f), mPaint);
-
-//            canvas.drawText("Azimuth:" + _Azimuth + " Pitch:" + _Pitch + " Roll" + _Roll, 0.0f, (float)(screenHeight - 50.0f), mPaint);
-            canvas.drawText("Azimuth:" + _Azimuth , 0.0f, (float)(screenHeight - 50.0f), mPaint);
+            canvas.drawText("Lat:" + lat + " Lon:" + lon, 0.0f, (float)(mScreenHeight - 100.0f), mPaint);
+            canvas.drawText("Pitch: " + pitch + " Roll: " + roll + " Azimuth: " + azimuth, 0.0f, (float)(mScreenHeight - 50.0f), mPaint);
+//            canvas.drawText("Azimuth:" + _Azimuth , 0.0f, (float)(mScreenWidth - 50.0f), mPaint);
         }
     }
 
