@@ -51,6 +51,9 @@ public class ARDrawSurfaceView extends View {
     private Bitmap[] mSpots, mBlips;
     private Bitmap mRadar;
 
+    private ARRadar mARRadar;
+
+
     public static ArrayList<ARPoint> props = new ArrayList<ARPoint>();
     static {
 //        props.add(new ARPoint(90d, 110.8000, "North Pole"));
@@ -70,6 +73,12 @@ public class ARDrawSurfaceView extends View {
         mPaint.setTextSize(50);
         mPaint.setStrokeWidth(ARDpiUtil.getPxFromDpi(getContext(), 2));
         mPaint.setAntiAlias(true);
+
+        mARRadar = new ARRadar();
+
+
+
+
 
 //        mRadar = BitmapFactory.decodeResource(context.getResources(), R.drawable.radar);
         mRadar = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_radar);
@@ -94,7 +103,12 @@ public class ARDrawSurfaceView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
-        canvas.drawBitmap(mRadar, 0, 0, mPaint);
+
+
+        mARRadar.setCanvas(canvas);
+        mARRadar.paint();
+
+//        canvas.drawBitmap(mRadar, 0, 0, mPaint);
 
         int radarCenterX = mRadar.getWidth() / 2;
         int radarCenterY = mRadar.getHeight() / 2;
