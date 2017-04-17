@@ -11,8 +11,6 @@ import android.graphics.Paint;
 public class ARBlip extends ARPoint{
 
 
-
-
     private Canvas mCanvas;
     private Paint mPaint;
     private double mAngle;
@@ -28,7 +26,6 @@ public class ARBlip extends ARPoint{
     private double mBlipLongitude;
     private double mSourceLatitude;
     private double mSourceLongitude;
-
 
     public ARBlip(double lat, double lon, String desc) {
         super(lat, lon, desc);
