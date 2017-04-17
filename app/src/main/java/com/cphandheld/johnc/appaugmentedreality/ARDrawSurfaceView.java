@@ -61,6 +61,7 @@ public class ARDrawSurfaceView extends View {
 //        props.add(new ARPoint(-33.870932d, 151.8000, "East"));
 //        props.add(new ARPoint(-33.870932d, 150.8000, "West"));
         props.add(new ARPoint(37.97280602299139d, -87.40445584058762d, "CP Handheld"));
+
     }
 
     public ARDrawSurfaceView(Context c, Paint paint) {
@@ -104,7 +105,6 @@ public class ARDrawSurfaceView extends View {
     protected void onDraw(Canvas canvas) {
 
 
-
         mARRadar.setCanvas(canvas);
         mARRadar.paint();
 
@@ -139,12 +139,7 @@ public class ARDrawSurfaceView extends View {
 
             double posInPx = angle * (mScreenWidth / 90d);
 
-            int blipCentreX = blip.getWidth() / 2;
-            int blipCentreY = blip.getHeight() / 2;
 
-            xPos = xPos - blipCentreX;
-            yPos = yPos + blipCentreY;
-            canvas.drawBitmap(blip, (radarCenterX + (int) xPos), (radarCenterY - (int) yPos), mPaint); //radar blip
 
             //reuse xPos
             int spotCentreX = spot.getWidth() / 2;
@@ -183,6 +178,7 @@ public class ARDrawSurfaceView extends View {
     public void setMyLocation(double latitude, double longitude) {
         _ARPointMe.latitude = latitude;
         _ARPointMe.longitude = longitude;
+        mARRadar.setRadarReference(_ARPointMe);
     }
 
     public void setMyOrientation(float azimuth, float pitch, float roll) {
@@ -191,13 +187,11 @@ public class ARDrawSurfaceView extends View {
         _Roll = roll;
     }
 
-
-
     /*
-     * Tangent: Opposite/Adgacent
-     * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
-     *
-     */
+ * Tangent: Opposite/Adgacent
+ * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
+ *
+ */
     protected double distInMetres(ARPoint me, ARPoint u) {
 
         double lat1 = me.latitude;
@@ -217,6 +211,8 @@ public class ARDrawSurfaceView extends View {
 
         return dist * 1000;
     }
+
+
 
     /*
      * Tangent: Opposite/Adgacent

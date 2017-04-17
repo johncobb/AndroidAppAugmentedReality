@@ -10,10 +10,7 @@ import android.graphics.Paint;
 
 public class ARBlip extends ARPoint{
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 738a983d5a34b8efa70e4310dae9af6c827cd0c2
     private Canvas mCanvas;
     private Paint mPaint;
     private double mAngle;
@@ -29,6 +26,9 @@ public class ARBlip extends ARPoint{
     private double mBlipLongitude;
     private double mSourceLatitude;
     private double mSourceLongitude;
+
+    private float mOriginX = 0.0f;
+    private float mOriginY = 0.0f;
 
     public ARBlip(double lat, double lon, String desc) {
         super(lat, lon, desc);
@@ -66,8 +66,16 @@ public class ARBlip extends ARPoint{
         mCanvas = canvas;
     }
 
+    public void setOrigin(float x, float y) {
+        mOriginX = x;
+        mOriginY = y;
+    }
+
     public void paint() {
 //        mAngle = bearing(mBlipLatitude, mBlipLongitude, mSourceLatitude, mSourceLongitude) - OFFSET;
+
+
+        mCanvas.drawCircle(mOriginX+40, mOriginY+25, 5, mPaint);
     }
 
 

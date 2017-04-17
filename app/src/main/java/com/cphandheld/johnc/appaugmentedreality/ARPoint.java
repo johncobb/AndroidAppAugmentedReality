@@ -1,5 +1,7 @@
 package com.cphandheld.johnc.appaugmentedreality;
 
+import android.location.Location;
+
 /**
  * Created by jcobb on 4/6/17.
  */
@@ -14,11 +16,14 @@ public class ARPoint extends ARDrawable {
     public float y = 0;
 
 
+
     public ARPoint(double lat, double lon, String desc) {
         this.latitude = lat;
         this.longitude = lon;
         this.description = desc;
     }
+
+
 
     protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
         double longDiff = Math.toRadians(lon2 - lon1);

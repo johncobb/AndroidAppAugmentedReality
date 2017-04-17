@@ -20,6 +20,9 @@ public class ARDrawable {
     public static boolean ANTIALIAS = true;
     public static float RADIUS = 125;
 
+    static float mOriginX = 0.0f;
+    static float mOriginY = 0.0f;
+
     private Canvas mCanvas;
     private int mWidth;
     private int mHeight;
