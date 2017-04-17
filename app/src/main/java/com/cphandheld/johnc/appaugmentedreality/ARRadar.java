@@ -35,16 +35,15 @@ public class ARRadar {
     static int mRadarCenterColor = Color.argb(255, 255, 255, 255);
     static int mRadarTextColor = Color.argb(255, 255, 255, 255);
 
+    ARBlip mARBlips[];
+
+
 
     static int mBogeyColor = Color.argb(225, 0, 180, 0);
-
-
-
     static int mBlipColor = Color.argb(100, 220, 0, 0);
 
     Location mLocationCurrent = new Location("provider");
     Location mLocationDestined = new Location("provider");
-
 
     public ARRadar() {
 
@@ -53,20 +52,25 @@ public class ARRadar {
         setAntiAlias(ANTIALIAS);
         setColor(mRadarColor);
         setFill(true);
+
+        mARBlips[0] = new ARBlip(0.0f, 0.0f, "", mCanvas);
     }
 
     public void setCanvas(Canvas canvas) {
         mCanvas = canvas;
     }
 
+    void sweep() {
+        for (int i=0; i<mARBlips.length-1; i++) {
+            mARBlips[i].paint();
+        }
+    }
 
     public void paint() {
         // Paint the Radar
 
         mOriginX = RADIUS * 2;
         mOriginY = RADIUS * 2;
-
-
 
         // Draw Radar Fill
         setFill(true);
@@ -88,6 +92,8 @@ public class ARRadar {
         setFill(true);
         setColor(mBogeyColor);
         mCanvas.drawCircle(mOriginX+40, mOriginY+25, 5, mPaint);
+
+        mARBlips[0].paint();
 
         setColor(mRadarTextColor);
         setFontSize(30.0f);
