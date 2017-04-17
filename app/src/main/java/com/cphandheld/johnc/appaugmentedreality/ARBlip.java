@@ -10,7 +10,10 @@ import android.graphics.Paint;
 
 public class ARBlip extends ARPoint{
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 738a983d5a34b8efa70e4310dae9af6c827cd0c2
     private Canvas mCanvas;
     private Paint mPaint;
     private double mAngle;
@@ -32,8 +35,6 @@ public class ARBlip extends ARPoint{
         mBlipLatitude = lat;
         mBlipLongitude = lon;
 
-
-
         mPaint = new Paint();
         setFontSize(FONT_SIZE);
         setAntiAlias(ANTIALIAS);
@@ -43,6 +44,19 @@ public class ARBlip extends ARPoint{
     }
 
 
+    public ARBlip(double lat, double lon, String desc, Canvas canvas) {
+        super(lat, lon, desc);
+        setCanvas(canvas);
+        mBlipLatitude = lat;
+        mBlipLongitude = lon;
+
+        mPaint = new Paint();
+        setFontSize(FONT_SIZE);
+        setAntiAlias(ANTIALIAS);
+        setColor(mColor);
+        setFill(true);
+
+    }
     public void scan(double lat, double lon) {
         mSourceLatitude = lat;
         mSourceLongitude = lon;
