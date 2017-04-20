@@ -195,6 +195,33 @@ public class MainActivity extends AppCompatActivity {
         return output;
     }
 
+    /*
+     * Implement sensor finite impulse filter
+     *
+     */
+
+    private final int N = 20;
+    private int n = 0;
+    private float x[] = new float[N];
+
+    protected float fir(float input) {
+
+        float y = 0.0f;
+
+        // Store current value of input
+        x[n] = input;
+
+        // Multiply the filter coefficients by the previous
+        // inputs and sum
+        for (int i=0; i<N; i++) {
+            y += x[n];
+        }
+
+        n = (n+ 1) % N;
+
+        return y/N;
+    }
+
     long lastInvalidate = 0;
 
     private final SensorEventListener mListener = new SensorEventListener() {
@@ -204,7 +231,8 @@ public class MainActivity extends AppCompatActivity {
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 mGyroRaw = lpf(event.values.clone(), mGyroRaw);
             } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-                mMagRaw = lpf(event.values.clone(), mMagRaw);
+//                mMagRaw = lpf(event.values.clone(), mMagRaw);
+                mMagRaw = event.values.clone();
             }
 
             // Make sure raw values from both sensors have reporeted at least once
@@ -233,6 +261,8 @@ public class MainActivity extends AppCompatActivity {
                 mPitch = (float)(((output[1]*180.0f/Math.PI))+90.0f);
                 mRoll = (float)(((output[2]*180.0f/Math.PI)));
 
+                mAzimuth = fir(mAzimuth);
+
                 // Duh
                 if(DEBUG)
                     Log.d(TAG, "sensorChanged Azimuth, Pitch, Roll (" + mAzimuth + ", " + mPitch + ", " + mRoll + ")");
@@ -253,6 +283,8 @@ public class MainActivity extends AppCompatActivity {
 
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
+
+
     };
 
 //    private final SensorEventListener mListener = new SensorEventListener() {

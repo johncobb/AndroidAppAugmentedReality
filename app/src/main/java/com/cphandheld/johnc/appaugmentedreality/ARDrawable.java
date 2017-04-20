@@ -23,7 +23,7 @@ public class ARDrawable {
     static float mOriginX = 0.0f;
     static float mOriginY = 0.0f;
 
-    private Canvas mCanvas;
+    public Canvas mCanvas;
     private int mWidth;
     private int mHeight;
     private Typeface mTypeface;
@@ -31,6 +31,11 @@ public class ARDrawable {
     private Paint mPaintBuffer;
 
     public ARDrawable() {}
+
+    public ARDrawable(Canvas canvas, Paint paint) {
+        mCanvas = canvas;
+        mPaint = paint;
+    }
 
 
     public Canvas getCanvas() {

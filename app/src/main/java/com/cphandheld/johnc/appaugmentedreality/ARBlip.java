@@ -10,10 +10,6 @@ import android.graphics.Paint;
 
 public class ARBlip extends ARPoint{
 
-
-    private Canvas mCanvas;
-    private Paint mPaint;
-    private double mAngle;
     static int mColor = Color.argb(225, 0, 180, 0);
 
     /*
@@ -30,40 +26,16 @@ public class ARBlip extends ARPoint{
     private float mOriginX = 0.0f;
     private float mOriginY = 0.0f;
 
+
     public ARBlip(double lat, double lon, String desc) {
         super(lat, lon, desc);
         mBlipLatitude = lat;
         mBlipLongitude = lon;
-
-        mPaint = new Paint();
-        setFontSize(FONT_SIZE);
-        setAntiAlias(ANTIALIAS);
-        setColor(mColor);
-        setFill(true);
-
     }
 
-
-    public ARBlip(double lat, double lon, String desc, Canvas canvas) {
-        super(lat, lon, desc);
-        setCanvas(canvas);
-        mBlipLatitude = lat;
-        mBlipLongitude = lon;
-
-        mPaint = new Paint();
-        setFontSize(FONT_SIZE);
-        setAntiAlias(ANTIALIAS);
-        setColor(mColor);
-        setFill(true);
-
-    }
     public void scan(double lat, double lon) {
         mSourceLatitude = lat;
         mSourceLongitude = lon;
-    }
-
-    public void setCanvas(Canvas canvas) {
-        mCanvas = canvas;
     }
 
     public void setOrigin(float x, float y) {
@@ -71,11 +43,29 @@ public class ARBlip extends ARPoint{
         mOriginY = y;
     }
 
+    public void setCanvas(Canvas canvas) {
+        mCanvas = canvas;
+    }
+
+    public void setPaint(Paint paint) {
+        mPaint = paint;
+    }
+
+    public void paint(Canvas canvas, Paint paint) {
+        setCanvas(canvas);
+        setPaint(paint);
+
+        paint();
+    }
+
     public void paint() {
-//        mAngle = bearing(mBlipLatitude, mBlipLongitude, mSourceLatitude, mSourceLongitude) - OFFSET;
 
+        setFontSize(FONT_SIZE);
+        setAntiAlias(ANTIALIAS);
+        setColor(mColor);
+        setFill(true);
 
-        mCanvas.drawCircle(mOriginX+40, mOriginY+25, 5, mPaint);
+        mCanvas.drawCircle(mOriginX, mOriginY, 5, mPaint);
     }
 
 
