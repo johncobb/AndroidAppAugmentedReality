@@ -1,14 +1,12 @@
 package com.cphandheld.johnc.appaugmentedreality;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,13 +17,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
-
-import java.security.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-
 
     private static final String TAG = "MainActivity";
     private static final boolean DEBUG = true;
@@ -35,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     private float mInclinationMatrix[];
 
     private SensorManager mSensorManager;
-    private Sensor mSensor;
     private List<Sensor> mSensors;
 
     private Sensor mGyro;
@@ -49,35 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
     private LocationManager mLocationManager;
     private LocationProvider mHigh;
-
     private ARDrawSurfaceView mARDrawSurfaceView;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Setup the matrix variables
+        /*
+         * Setup the matrix variables
+         */
         mRotationMatrixTemp = new float[9];
         mRotationMatrix = new float[9];
         mInclinationMatrix = new float[9];
 
-
-//        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//        mSensorManager = (SensorManager) MyApplication.getInstance().getSystemService(Context.SENSOR_SERVICE);
-//
-//        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
         setContentView(R.layout.activity_main);
-
         mARDrawSurfaceView = (ARDrawSurfaceView) findViewById(R.id.drawSurfaceView);
-
-//        mLocationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-//        mLocationManager = (LocationManager) MyApplication.getInstance().getSystemService(LOCATION_SERVICE);
-//
-//        mHigh = mLocationManager.getProvider(mLocationManager.getBestProvider(ARUtil.getFineCriteria(), true));
-
-//        initSensors();
-
     }
 
     @Override
@@ -87,25 +66,36 @@ public class MainActivity extends AppCompatActivity {
         if (DEBUG)
             Log.d(TAG, "onResume");
 
-        // Get reference to LocationManager
+        /*
+         * Get reference to LocationManager
+         */
         mLocationManager = (LocationManager) MyApplication.getInstance().getSystemService(LOCATION_SERVICE);
 
-        // Get reference to provider that will provide the best/(High) accuracy
+        /*
+         * Get reference to provider that will provide the best/(High) accuracy
+         */
         mHigh = mLocationManager.getProvider(mLocationManager.getBestProvider(ARUtil.getFineCriteria(), true));
 
-
-        // Get reference to SensorManager
+        /*
+         * Get reference to SensorManager
+         */
         mSensorManager = (SensorManager) MyApplication.getInstance().getSystemService(Context.SENSOR_SERVICE);
 
-        // Get Gyroscopic Sensor
+        /*
+         * Get Gyroscopic Sensor
+         */
         mSensors = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
         if (mSensors.size() > 0) mGyro = mSensors.get(0);
 
-        // Get Magnetometer Sensor
+        /*
+         * Get Magnetometer Sensor
+         */
         mSensors = mSensorManager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD);
         if (mSensors.size() > 0) mMag = mSensors.get(0);
 
-        // Register the sensors with the event listener
+        /*
+         * Register the sensors with the event listener
+         */
         mSensorManager.registerListener(mListener, mGyro, SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(mListener, mMag, SensorManager.SENSOR_DELAY_GAME);
 
@@ -136,8 +126,6 @@ public class MainActivity extends AppCompatActivity {
         mSensorManager.unregisterListener(mListener);
         super.onStop();
     }
-
-
 
     private void initSensors() {
 
@@ -174,18 +162,13 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
-
+    /*
+     *  Implement sensor rate independent low-pass filter
+     */
     private static final float ALPHA = 0.25f;
 
-    /*
-     *
-     *  Implement sensor rate independent low-pass filter
-     *
-     *
-     */
     protected float[] lpf( float[] input, float[] output ) {
         if ( output == null ) return input;
 
@@ -197,9 +180,7 @@ public class MainActivity extends AppCompatActivity {
 
     /*
      * Implement sensor finite impulse filter
-     *
      */
-
     private final int N = 20;
     private int n = 0;
     private float x[] = new float[N];
@@ -284,44 +265,6 @@ public class MainActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
         }
 
-
     };
-
-//    private final SensorEventListener mListener = new SensorEventListener() {
-//        public void onSensorChanged(SensorEvent event) {
-//
-////            mAzimuth = event.values[0];
-////            mPitch = event.values[1];
-////            mRoll = event.values[2];
-//
-//            // Apply low pass filter to sensors
-//            sensors = lpf(event.values.clone(), sensors);
-//
-//            // Update the variables with filtered values
-//            mAzimuth = sensors[0];
-//            mPitch = sensors[1];
-//            mRoll = sensors[2];
-//
-//            if(DEBUG)
-//                Log.d(TAG, "sensorChanged Azimuth, Pitch, Roll (" + mAzimuth + ", " + mPitch + ", " + mRoll + ")");
-//
-//
-//            if (mARDrawSurfaceView != null) {
-//                mARDrawSurfaceView.setOffset(mAzimuth);
-//                mARDrawSurfaceView.setMyOrientation(mAzimuth, mPitch, mRoll);
-//
-//                // Only update every 50 millis so that we don't overload
-//                // the draw routine
-//                if((System.currentTimeMillis() - lastInvalidate) > 50) {
-//                    mARDrawSurfaceView.invalidate();
-//                    lastInvalidate = System.currentTimeMillis();
-//                }
-//
-//            }
-//        }
-//
-//        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-//        }
-//    };
 
 }

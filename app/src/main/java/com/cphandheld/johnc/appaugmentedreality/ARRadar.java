@@ -2,6 +2,7 @@ package com.cphandheld.johnc.appaugmentedreality;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -31,30 +32,23 @@ public class ARRadar {
     private static boolean ANTIALIAS = true;
     private static float RADIUS = 125;
 //    private static float MAX_RADAR_RADIUS = 16093.4f; // 10 miles
-private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
+    private static float MAX_RADAR_RADIUS = 8046.7f; // 5 miles
 
-    static float mOriginX = 0.0f;
-    static float mOriginY = 0.0f;
-    float mRoll = 0.0f;
-    float mPitch = 0.0f;
-    float mAzimuth = 0.0f;
+    private static float mOriginX = 0.0f;
+    private static float mOriginY = 0.0f;
+    private float mRoll = 0.0f;
+    private float mPitch = 0.0f;
+    private float mAzimuth = 0.0f;
 
     static int mRadarColor = Color.argb(80, 255, 255, 255);
     static int mRadarBorderColor = Color.argb(255, 255, 255, 255);
     static int mRadarCenterColor = Color.argb(255, 255, 255, 255);
     static int mRadarTextColor = Color.argb(255, 255, 255, 255);
 
-
-    ARPoint mARRadarReference = new ARPoint(37.97280602299139d, -87.40445584058762d, "RadarReferencePoint");
+    private ARPoint mARRadarReference = new ARPoint(37.97280602299139d, -87.40445584058762d, "RadarReferencePoint");
 
 
     public static ArrayList<ARBlip> mARScanResult = new ArrayList<ARBlip>();
-
-    static int mBogeyColor = Color.argb(225, 0, 180, 0);
-    static int mBlipColor = Color.argb(100, 220, 0, 0);
-
-    Location mLocationCurrent = new Location("provider");
-    Location mLocationDestined = new Location("provider");
 
     public ARRadar() {
         mPaint = new Paint();
@@ -63,20 +57,23 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
         setColor(mRadarColor);
         setFill(true);
 
+        /*
+         * Sweep will populate the array list of blips we want to
+         * paint on the radar
+         */
         sweep();
     }
 
     public void setRadarReference(ARPoint p) {
         mARRadarReference = p;
     }
+    public ARPoint getRadarReference() { return mARRadarReference;}
 
     public void setRadarOrientation(float roll, float pitch, float azimuth) {
         mRoll = roll;
         mPitch = pitch;
         mAzimuth = azimuth;
     }
-
-
 
     /*
      *  Scan for new targets to paint on radar
@@ -115,12 +112,6 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
             meters = meters * RADIUS;
 
             /*
-             * Calculate the angle based upon 0.00 degree reference point
-             * We'll add to the origin/phone compass bearing.
-             */
-//            double angle = bearing(mARRadarReference.latitude, mARRadarReference.longitude, blip.latitude, blip.longitude) - OFFSET;
-
-            /*
              * Calculate theoretical azimuth in radians
              */
             double deltaAzimuth = 0d;
@@ -130,43 +121,34 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
             double angle = theoreticalAzimuth;
             double xPos, yPos;
 
-
+            /*
+             * Calculated azimuth tells us where on the radial to plot
+             */
             calculatedAzimuth = (realAzimuth + theoreticalAzimuth)% 360;
 
+            /*
+             * Difference between our calculated azimuth and real azimuth
+             */
             deltaAzimuth = calculatedAzimuth - realAzimuth;
 
+            /*
+             * Sum of real azimuth and delta to tell us where on the radial
+             * to calculate the location of the target
+             */
             angle = realAzimuth + deltaAzimuth;
 
-
-
-
-
-            /*
-             * Sanity check
-             */
-//            if(angle < 0)
-//                angle = (angle+360)%360;
-
-            /*
-             * Orient the blip according to origin/phone azimuth
-             */
-//            angle += mAzimuth;
-
             // Math is fun
-//            xPos = Math.sin(Math.toRadians(angle)) * meters;
-//            yPos = Math.sqrt(Math.pow(meters, 2) - Math.pow(xPos, 2));
-
             xPos = Math.sin(angle) * meters;
             yPos = Math.sqrt(Math.pow(meters, 2) - Math.pow(xPos, 2));
 
 
             /*
              *         360
-             *          *
-             *          *
+             *          +
+             *          +
              * 270 **** 0 **** 090
-             *          *
-             *          *
+             *          -
+             *          -
              *         180
              */
             if (angle > 90 && angle < 270)
@@ -175,13 +157,46 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
 
             DisplayMetrics m = ARDpiUtil.getDisplayMetrics(MyApplication.getInstance().getApplicationContext());
 
-            double posInPx = angle * (m.widthPixels / 90d);
 
+            /*
+             * Use the radar center point to calculate where to paint the target
+             */
             float paintX = mOriginX + (float)xPos;
             float paintY = mOriginY + (float)yPos;
 
             blip.setOrigin(paintX, paintY);
             blip.paint(mCanvas, mPaint);
+
+
+
+            /*
+             * New code to render camera perspective of spot
+             */
+
+            Bitmap spot = BitmapFactory.decodeResource(MyApplication.getInstance().getApplicationContext().getResources(), R.drawable.ic_dot);
+
+            double posInPx = angle * (m.widthPixels / 90d);
+            int spotCenterX = spot.getWidth() / 2;
+            int spotCenterY = spot.getHeight() / 2;
+            xPos = posInPx - spotCenterX;
+
+            if (angle <= 45)
+                blip.markerX = (float) ((m.widthPixels / 2) + xPos);
+            else if (angle >= 315)
+                blip.markerX = (float) ((m.widthPixels / 2) - ((m.widthPixels*4) - xPos));
+            else
+                blip.markerX = (float)(m.widthPixels*9); //somewhere off the screen
+
+            blip.markerY = (float)m.widthPixels/2 + spotCenterY;
+            mCanvas.drawBitmap(spot, blip.markerX, blip.markerY, mPaint); // marker at camera spot
+            mPaint.setColor(Color.GREEN);
+            mPaint.setTextSize(25);
+            mPaint.setAntiAlias(true);
+            mCanvas.drawText(blip.description, blip.markerX, blip.markerY, mPaint); // marker description camera spot
+
+            /*
+             * End New code to render camera perspective of spot
+             */
 
 
             mPaint.setColor(Color.GREEN);
@@ -192,19 +207,8 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
             mCanvas.drawText("Calculated Azimuth:" + calculatedAzimuth , 0.0f, (float)(m.widthPixels - 50.0f), mPaint);
 
         }
-    }
 
 
-
-    protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
-        double longDiff = Math.toRadians(lon2 - lon1);
-        double la1 = Math.toRadians(lat1);
-        double la2 = Math.toRadians(lat2);
-        double y = Math.sin(longDiff) * Math.cos(la2);
-        double x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(longDiff);
-
-        double result = Math.toDegrees(Math.atan2(y, x));
-        return (result+360.0d)%360.0d;
     }
 
     /*
@@ -277,8 +281,6 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
 
 
     public void paint(Canvas canvas, Paint paint) {
-//        mCanvas = canvas;
-//        mPaint = paint;
         setCanvas(canvas);
         setPaint(paint);
         paint();
@@ -307,14 +309,25 @@ private static float MAX_RADAR_RADIUS = 8000.0f; // 10 miles
         mCanvas.drawCircle(mOriginX, mOriginY, 5, mPaint);
 
 
-        // Call Radar Paint Targets
+        /*
+         * Paint the targets on the radar
+         */
         paintTargets();
 
+        /*
+         * Format the paint and set font size
+         */
         setColor(mRadarTextColor);
         setFontSize(30.0f);
 
+        /*
+         * Format magnetic orientation
+         */
         String direction = String.format("%.1f", mAzimuth);
 
+        /*
+         * Paint the direction in degrees
+         */
         float tw = getTextWidth(direction);
         mCanvas.drawText(direction, mOriginX - (tw/2), mOriginY-RADIUS-10, mPaint);
 

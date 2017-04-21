@@ -39,32 +39,14 @@ import android.view.View;
  */
 
 public class ARDrawSurfaceView extends View {
-    ARPoint _ARPointMe = new ARPoint(37.97280602299139d, -87.40445584058762d, "Me");
-
-
-
-    float mRoll = 0.0f;
-    float mPitch = 0.0f;
-    float mAzimuth = 0.0f;
+    ARPoint mARPoint = new ARPoint(37.97280602299139d, -87.40445584058762d, "Me");
 
     Paint mPaint = new Paint();
     private double OFFSET = 0d;
     private double mScreenWidth, mScreenHeight = 0d;
-    private Bitmap[] mSpots, mBlips;
-    private Bitmap mRadar;
 
     private ARRadar mARRadar;
 
-
-    public static ArrayList<ARPoint> props = new ArrayList<ARPoint>();
-    static {
-//        props.add(new ARPoint(90d, 110.8000, "North Pole"));
-//        props.add(new ARPoint(-90d, -110.8000, "South Pole"));
-//        props.add(new ARPoint(-33.870932d, 151.8000, "East"));
-//        props.add(new ARPoint(-33.870932d, 150.8000, "West"));
-        props.add(new ARPoint(37.97280602299139d, -87.40445584058762d, "CP Handheld"));
-
-    }
 
     public ARDrawSurfaceView(Context c, Paint paint) {
         super(c);
@@ -79,16 +61,6 @@ public class ARDrawSurfaceView extends View {
 
         mARRadar = new ARRadar();
 
-//        mRadar = BitmapFactory.decodeResource(context.getResources(), R.drawable.radar);
-        mRadar = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_radar);
-
-        mSpots = new Bitmap[props.size()];
-        for (int i = 0; i < mSpots.length; i++)
-            mSpots[i] = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_dot);
-
-        mBlips = new Bitmap[props.size()];
-        for (int i = 0; i < mBlips.length; i++)
-            mBlips[i] = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_blip);
     }
 
     @Override
@@ -102,75 +74,7 @@ public class ARDrawSurfaceView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
-//        mARRadar.setCanvas(canvas);
-//        mARRadar.setPaint(mPaint);
-//        mARRadar.paint();
-
         mARRadar.paint(canvas, mPaint);
-
-//        canvas.drawBitmap(mRadar, 0, 0, mPaint);
-
-//        int radarCenterX = mRadar.getWidth() / 2;
-//        int radarCenterY = mRadar.getHeight() / 2;
-//
-//
-//
-//        for (int i = 0; i < mBlips.length; i++) {
-//            Bitmap blip = mBlips[i];
-//            Bitmap spot = mSpots[i];
-//            ARPoint u = props.get(i);
-//            double dist = distInMetres(_ARPointMe, u);
-//
-//            if (blip == null || spot == null)
-//                continue;
-//
-//            if(dist > 70)
-//                dist = 70; //we have set points very far away for demonstration
-//
-//            double angle = bearing(_ARPointMe.latitude, _ARPointMe.longitude, u.latitude, u.longitude) - OFFSET;
-//            double xPos, yPos;
-//
-//            if(angle < 0)
-//                angle = (angle+360)%360;
-//
-//            xPos = Math.sin(Math.toRadians(angle)) * dist;
-//            yPos = Math.sqrt(Math.pow(dist, 2) - Math.pow(xPos, 2));
-//
-//            if (angle > 90 && angle < 270)
-//                yPos *= -1;
-//
-//            double posInPx = angle * (mScreenWidth / 90d);
-//
-//
-//
-//            //reuse xPos
-//            int spotCentreX = spot.getWidth() / 2;
-//            int spotCentreY = spot.getHeight() / 2;
-//            xPos = posInPx - spotCentreX;
-//
-//            if (angle <= 45)
-//                u.x = (float) ((mScreenWidth / 2) + xPos);
-//
-//            else if (angle >= 315)
-//                u.x = (float) ((mScreenWidth / 2) - ((mScreenWidth*4) - xPos));
-//
-//            else
-//                u.x = (float) (float)(mScreenWidth*9); //somewhere off the screen
-//
-//            u.y = (float)mScreenHeight/2 + spotCentreY;
-//            canvas.drawBitmap(spot, u.x, u.y, mPaint); //camera spot
-//            canvas.drawText(u.description, u.x, u.y, mPaint); //text
-//
-//            String lat = String.format("%.6f", _ARPointMe.latitude);
-//            String lon = String.format("%.6f", _ARPointMe.longitude);
-//            String pitch = String.format("%.2f", _Pitch);
-//            String roll = String.format("%.2f", _Roll);
-//            String azimuth = String.format("%.2f", _Azimuth);
-//
-//            canvas.drawText("Lat:" + lat + " Lon:" + lon, 0.0f, (float)(mScreenHeight - 100.0f), mPaint);
-//            canvas.drawText("Pitch: " + pitch + " Roll: " + roll + " Azimuth: " + azimuth, 0.0f, (float)(mScreenHeight - 50.0f), mPaint);
-//            canvas.drawText("Azimuth:" + _Azimuth , 0.0f, (float)(mScreenWidth - 50.0f), mPaint);
-//        }
     }
 
     public void setOffset(float offset) {
@@ -178,97 +82,13 @@ public class ARDrawSurfaceView extends View {
     }
 
     public void setMyLocation(double latitude, double longitude) {
-        _ARPointMe.latitude = latitude;
-        _ARPointMe.longitude = longitude;
-        mARRadar.setRadarReference(_ARPointMe);
+        mARPoint.latitude = latitude;
+        mARPoint.longitude = longitude;
+        mARRadar.setRadarReference(mARPoint);
     }
 
     public void setMyOrientation(float azimuth, float pitch, float roll) {
-        mRoll = roll;
-        mPitch = pitch;
-        mAzimuth = azimuth;
-        mARRadar.setRadarOrientation(mRoll, mPitch, mAzimuth);
+        mARRadar.setRadarOrientation(roll, pitch, azimuth);
     }
 
-    /*
-     * Tangent: Opposite/Adgacent
-     * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
-     *
-     */
-    protected double distInMetres(ARPoint me, ARPoint u) {
-
-        double lat1 = me.latitude;
-        double lng1 = me.longitude;
-
-        double lat2 = u.latitude;
-        double lng2 = u.longitude;
-
-        double earthRadius = 6371;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-        double sindLat = Math.sin(dLat / 2);
-        double sindLng = Math.sin(dLng / 2);
-        double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2) * Math.cos(lat1) * Math.cos(lat2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double dist = earthRadius * c;
-
-        return dist * 1000;
-    }
-
-
-
-    /*
-     * Tangent: Opposite/Adgacent
-     * Source: https://www.mathsisfun.com/definitions/tangent-function-.html
-     * Source: https://www.netguru.co/blog/augmented-reality-mobile-android
-     *
-     *  Quadrant        Sign of Growth    Relation between azimuth
-     *   coords     Δ cos(A)  Δ sin(A)  azimuth and angle ᵠ in grads
-     *  --------    --------  --------  ----------------------------
-     *     I           +          +                 A=ᵠ
-     *    II           -          +               A=200g-ᵠ
-     *   III           -          -               A=200g+ᵠ
-     *    IV           +          -               A=400g-ᵠ
-     *
-     */
-    protected double calculateTheoreticalAzimuth(ARPoint poi) {
-
-        double dX = poi.latitude - _ARPointMe.latitude;
-        double dY = poi.longitude - _ARPointMe.longitude;
-
-        double phiAngle;
-        double tanOfPhiAngle;
-        double azimuth;
-
-        tanOfPhiAngle = Math.abs(dY / dX);
-        phiAngle = Math.atan(tanOfPhiAngle);
-        tanOfPhiAngle = Math.toDegrees(tanOfPhiAngle);
-
-        if (dX > 0 && dY > 0) {
-            return azimuth = phiAngle;
-        } else if (dX < 0 && dY > 0) {
-            return azimuth = 180 - phiAngle;
-        } else if (dX < 0 && dY < 0){
-            return azimuth = 180 + phiAngle;
-        } else if (dX > 0 && dY < 0) {
-            return 360 - phiAngle;
-        }
-
-        return phiAngle;
-
-    }
-
-
-
-
-    protected static double bearing(double lat1, double lon1, double lat2, double lon2) {
-        double longDiff = Math.toRadians(lon2 - lon1);
-        double la1 = Math.toRadians(lat1);
-        double la2 = Math.toRadians(lat2);
-        double y = Math.sin(longDiff) * Math.cos(la2);
-        double x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(longDiff);
-
-        double result = Math.toDegrees(Math.atan2(y, x));
-        return (result+360.0d)%360.0d;
-    }
 }

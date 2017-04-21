@@ -10,32 +10,29 @@ import android.graphics.Paint;
 
 public class ARBlip extends ARPoint{
 
-    static int mColor = Color.argb(225, 0, 180, 0);
-
-    /*
-     *  Blip: is lat lon detected from objects identified on the radar sweep (Cars)
-     *  Bogey: is lat lon superimposed on the radar on the radar sweep (Target Car We Want)
-     *  Source: is lat lon of the radar observer: (Phone)
-     */
-
-    private double mBlipLatitude;
-    private double mBlipLongitude;
-    private double mSourceLatitude;
-    private double mSourceLongitude;
-
+    private static int BLIP_RADIUS = 5;
+    private static int mColor = Color.argb(225, 0, 180, 0);
     private float mOriginX = 0.0f;
     private float mOriginY = 0.0f;
 
 
+    public ARBlip(double lat, double lon, String desc, Canvas canvas, Paint paint) {
+        super(lat, lon, desc);
+        this.latitude = lat;
+        this.longitude = lon;
+        setCanvas(canvas);
+        setPaint(paint);
+    }
+
     public ARBlip(double lat, double lon, String desc) {
         super(lat, lon, desc);
-        mBlipLatitude = lat;
-        mBlipLongitude = lon;
+        this.latitude = lat;
+        this.longitude = lon;
     }
 
     public void scan(double lat, double lon) {
-        mSourceLatitude = lat;
-        mSourceLongitude = lon;
+        this.latitude = lat;
+        this.longitude = lon;
     }
 
     public void setOrigin(float x, float y) {
@@ -59,15 +56,12 @@ public class ARBlip extends ARPoint{
     }
 
     public void paint() {
-
         setFontSize(FONT_SIZE);
         setAntiAlias(ANTIALIAS);
         setColor(mColor);
         setFill(true);
 
-        mCanvas.drawCircle(mOriginX, mOriginY, 5, mPaint);
+        mCanvas.drawCircle(mOriginX, mOriginY, BLIP_RADIUS, mPaint);
     }
-
-
 
 }
